@@ -1,0 +1,4 @@
+date,ticker,side,qty,price,fee
+2024-01-10,AAPL,BUY,10,180,0.50
+2024-02-05,AAPL,SELL,5,200,0.50
+2024-03-12,MSFT,BUY,4,400,0.00
