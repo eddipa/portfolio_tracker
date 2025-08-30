@@ -22,4 +22,5 @@ class Lot:
         """
         if self.qty == 0:
             return D(0)
-        return (self.cost / self.qty).quantize(D("0.0000001"))
+        # IMPORTANT: use absolute qty so per-share cost is positive for both long and short lots
+        return (self.cost / abs(self.qty)).quantize(D("0.0000001"))

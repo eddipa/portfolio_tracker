@@ -28,28 +28,55 @@ class Report:
     total_equity: Money
 
 def build_report(inv: Inventory, prices: Dict[str, Money]) -> Report:
+    """
+    Build a report with correct unrealized PnL handling for both longs and shorts.
+    - Long lots (qty > 0): unreal = (mkt - cost_per_share) * qty
+    - Short lots (qty < 0): unreal = (cost_per_share - mkt) * (-qty)
+    Equity uses market value = qty * mkt (negative for shorts).
+    """
     positions: List[PositionSummary] = []
 
     total_unrealized = D(0)
     total_equity = D(0)
 
     for ticker, lots in inv.positions().items():
-        qty = sum((lot.qty for lot in lots), D(0))
-        if qty == 0:
+        if not lots:
             continue
         mkt = prices.get(ticker, D(0))
-        # Aggregate cost basis and market value
-        cost_basis = sum((lot.cost for lot in lots), D(0))
-        market_value = qty * mkt
-        unreal = market_value - cost_basis
-        avg_cost_per_share = (cost_basis / qty).quantize(D("0.0000001")) if qty != 0 else D(0)
+
+        agg_qty = D(0)
+        agg_cost_basis = D(0)
+        unreal = D(0)
+        market_value = D(0)
+
+        for lot in lots:
+            cp = lot.cost_per_share
+            if lot.qty > 0:
+                # Long: gain if market > cost
+                unreal += (mkt - cp) * lot.qty
+            elif lot.qty < 0:
+                # Short: gain if market < cost
+                unreal += (cp - mkt) * (-lot.qty)
+            agg_qty += lot.qty
+            agg_cost_basis += lot.cost
+            market_value += lot.qty * mkt
+
+        if agg_qty == 0:
+            continue
+
+        # Average cost per share (positive number for both long & short)
+        avg_cost_per_share = (
+            (agg_cost_basis / abs(agg_qty)).quantize(D("0.0000001"))
+            if agg_qty != 0 else D(0)
+        )
+
         positions.append(PositionSummary(
             ticker=ticker,
-            qty=qty,
+            qty=agg_qty,
             avg_cost=avg_cost_per_share,
             mkt_price=mkt,
             market_value=market_value,
-            cost_basis=cost_basis,
+            cost_basis=agg_cost_basis,
             unrealized_pnl=unreal,
         ))
         total_unrealized += unreal
@@ -65,6 +92,7 @@ def build_report(inv: Inventory, prices: Dict[str, Money]) -> Report:
         total_unrealized=total_unrealized,
         total_equity=total_equity,
     )
+
 
 # ---------------------- Reporting (console) ----------------------
 

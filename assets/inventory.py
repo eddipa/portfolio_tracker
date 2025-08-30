@@ -66,16 +66,21 @@ class Inventory:
         while qty_remaining > 0 and lots and (lots[0].qty < 0 if self.method == MatchMethod.FIFO else lots[-1].qty < 0):
             lot = lots[0] if self.method == MatchMethod.FIFO else lots[-1]
             cover_qty = min(qty_remaining, -lot.qty)
-            # Realized PnL = (lot cost per share * (-1) - buy price) * cover_qty? Wait: short opened with negative qty and cost is proceeds.
-            # Convention: For a short lot, cost is the cash received (positive), qty is negative. Realized when covering: proceeds - cost basis per share -> actually PnL = (lot.cost_per_share - buy_price) * cover_qty
-            pnl = (lot.cost_per_share - tr.price) * cover_qty
+            # Realized PnL = (lot cost per share * (-1) - buy price) * cover_qty?
+            # Wait: short opened with negative qty and cost is proceeds.
+            # Convention: For a short lot, cost is the cash received (positive),
+            # qty is negative. Realized when covering:
+            # proceeds - cost basis per share ->
+            # actually PnL = (lot.cost_per_share - buy_price) * cover_qty
+            cp = lot.cost_per_share                 # positive number (e.g., 50)
+            pnl = (cp - tr.price) * cover_qty
             self.realized[tr.ticker] += pnl
-            lot.qty += cover_qty  # less negative
-            lot.cost -= lot.cost_per_share * cover_qty  # reduce proportional cost/proceeds
+
+            lot.qty += cover_qty  
+            lot.cost -= cp * cover_qty  # reduce proportional cost/proceeds
             qty_remaining -= cover_qty
             if lot.qty == 0:
-                pop_left()
-        
+                pop_left()  
         if qty_remaining > 0:
             # Add remaining as a long lot; include fee fully in this lot's cost basis.
             push(Lot(qty=qty_remaining, cost=qty_remaining * price + fee, date=tr.date))
