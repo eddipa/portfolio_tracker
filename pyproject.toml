@@ -6,16 +6,24 @@ build-backend = "setuptools.build_meta"
 name = "python-portfolio-tracker"
 version = "0.1.0"
 description = "FIFO/LIFO portfolio tracker with shorts, fees, and PnL reporting."
-authors = [
-    { name = "Masoud Koochak" }
-]
 readme = "README.md"
+authors = [{ name = "Masoud Koochak" }]
 license = { text = "MIT" }
 requires-python = ">=3.9"
 
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
 [project.scripts]
-python_portfolio_tracker = "python_portfolio_tracker.cli:main"
+python_portfolio_tracker = "main:main"
+
+[tool.setuptools]
+py-modules = ["main"]
+packages = ["utils", "assets", "reports"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["."]
 testpaths = ["tests"]

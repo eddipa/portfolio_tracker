@@ -52,5 +52,8 @@ def run_cli(argv: Optional[List[str]] = None) -> int:
     return 0
 
 
+def main(argv=None):
+    run_cli(argv=argv)
+
 if __name__ == "__main__":
-    sys.exit(run_cli())
+    raise SystemExit(main())
