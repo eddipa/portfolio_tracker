@@ -64,7 +64,7 @@ def test_short_partial_cover_cost_carries_correctly():
     inv.apply_trade(T("2024-01-10", "TSLA", "SELL", 5, 50, 0))     # cost = 250, qty = -5
     inv.apply_trade(T("2024-01-15", "TSLA", "BUY", 3, 40, 0))      # cover 3 -> cost should be 100, qty = -2
     # Peek into internal lots
-    lots = inv._lots["TSLA"]
+    lots = inv._lots["TSLA"] # pylint: disable=W0212
     lot = lots[0]
     assert lot.qty == D("-2")
     assert lot.cost == D("100")
