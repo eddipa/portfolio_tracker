@@ -33,7 +33,7 @@ Examples of unacceptable behavior:
 
 ## Enforcement
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project maintainer at **your.email@example.com**.
+reported by contacting the project maintainer.
 All complaints will be reviewed and investigated, and will result in a response
 that is appropriate to the circumstances.
 
